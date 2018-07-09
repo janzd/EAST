@@ -197,9 +197,11 @@ def main(argv=None):
     if not os.path.exists(FLAGS.checkpoint_path):
         os.mkdir(FLAGS.checkpoint_path)
     else:
-        if not FLAGS.restore:
-            shutil.rmtree(FLAGS.checkpoint_path)
-            os.mkdir(FLAGS.checkpoint_path)
+        #if not FLAGS.restore:
+        #    shutil.rmtree(FLAGS.checkpoint_path)
+        #    os.mkdir(FLAGS.checkpoint_path)
+        shutil.rmtree(FLAGS.checkpoint_path)
+        os.mkdir(FLAGS.checkpoint_path)
 
     train_data_generator = data_processor.generator(FLAGS)
     train_samples_count = data_processor.count_samples(FLAGS)

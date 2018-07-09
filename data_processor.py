@@ -17,8 +17,6 @@ from shapely.geometry import Polygon
 
 import tensorflow as tf
 
-from data_util import GeneratorEnqueuer
-
 def get_images(data_path):
     files = []
     idx = 0
