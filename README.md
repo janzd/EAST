@@ -33,7 +33,7 @@ python train.py --gpu_list=0,1 --input_size=512 --batch_size=12 --num_workers=6 
 
 ### Test
 ```
-python eval.py --gpu_list=0 --test_data_path=../data/ICDAR2015/test_data/ --checkpoint_path=tmp/icdar2015_east_resnet50/ --output_dir=tmp/icdar2015_east_resnet50/eval/
+python eval.py --gpu_list=0 --test_data_path=../data/ICDAR2015/test_data/ --model_path=tmp/icdar2015_east_resnet50/ --output_dir=tmp/icdar2015_east_resnet50/eval/
 ```
 
 README: TO BE FINISHED SOON
