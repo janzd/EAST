@@ -19,7 +19,7 @@ FLAGS = parser.parse_args()
 
 from model import *
 from losses import *
-from icdar import restore_rectangle
+from data_processor import restore_rectangle
 
 def get_images():
     '''
