@@ -98,15 +98,17 @@ class CustomTensorBoard(TensorBoard):
     def on_epoch_end(self, epoch, logs=None):        
         logs.update({'learning_rate': K.eval(self.model.optimizer.lr), 'small_text_weight': K.eval(self.small_text_weight)})
         data = next(self.data_generator)
-        pred_score_maps, pred_geo_maps = self.model.predict([data[0][0], data[0][1], data[0][2]])
+        pred_score_maps, pred_geo_maps = self.model.predict([data[0][0], data[0][1], data[0][2], data[0][3])
         img_summaries = []
         for i in range(3):
             input_image_summary = make_image_summary(((data[0][0][i] + 1) * 127.5).astype('uint8'))
-            training_mask_summary = make_image_summary((data[0][1][i] * 255).astype('uint8'))
+            overly_small_text_region_training_mask_summary = make_image_summary((data[0][1][i] * 255).astype('uint8'))
+            text_region_boundary_training_mask_summary = make_image_summary((data[0][2][i] * 255).astype('uint8'))
             target_score_map_summary = make_image_summary((data[1][0][i] * 255).astype('uint8'))
             pred_score_map_summary = make_image_summary((pred_score_maps[i] * 255).astype('uint8'))            
             img_summaries.append(tf.Summary.Value(tag='input_image/%d' % i, image=input_image_summary))
-            img_summaries.append(tf.Summary.Value(tag='training_mask/%d' % i, image=training_mask_summary))
+            img_summaries.append(tf.Summary.Value(tag='overly_small_text_region_training_mask/%d' % i, image=overly_small_text_region_training_mask_summary))
+            img_summaries.append(tf.Summary.Value(tag='text_region_boundary_training_mask/%d' % i, image=text_region_boundary_training_mask_summary))
             img_summaries.append(tf.Summary.Value(tag='score_map_target/%d' % i, image=target_score_map_summary))
             img_summaries.append(tf.Summary.Value(tag='score_map_pred/%d' % i, image=pred_score_map_summary))
             for j in range(4):
@@ -142,7 +144,7 @@ class ValidationEvaluator(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         if (epoch + 1) % self.period == 0:
-            val_loss, val_score_map_loss, val_geo_map_loss = self.model.evaluate([self.validation_data[0], self.validation_data[1], self.validation_data[2]], [self.validation_data[2], self.validation_data[3]], batch_size=FLAGS.batch_size)
+            val_loss, val_score_map_loss, val_geo_map_loss = self.model.evaluate([self.validation_data[0], self.validation_data[1], self.validation_data[2], self.validation_data[3], [self.validation_data[3], self.validation_data[4]], batch_size=FLAGS.batch_size)
             print('\nEpoch %d: val_loss: %.4f, val_score_map_loss: %.4f, val_geo_map_loss: %.4f' % (epoch + 1, val_loss, val_score_map_loss, val_geo_map_loss))
             val_loss_summary = tf.Summary()
             val_loss_summary_value = val_loss_summary.value.add()
@@ -164,19 +166,21 @@ class ValidationEvaluator(Callback):
             img_summaries = []
             for i in range(3):
                 input_image_summary = make_image_summary(((self.validation_data[0][i] + 1) * 127.5).astype('uint8'))
-                training_mask_summary = make_image_summary((self.validation_data[1][i] * 255).astype('uint8'))
-                target_score_map_summary = make_image_summary((self.validation_data[2][i] * 255).astype('uint8'))
+                overly_small_text_region_training_mask_summary = make_image_summary((self.validation_data[1][i] * 255).astype('uint8'))
+                text_region_boundary_training_mask_summary = make_image_summary((self.validation_data[2][i] * 255).astype('uint8'))
+                target_score_map_summary = make_image_summary((self.validation_data[3][i] * 255).astype('uint8'))
                 pred_score_map_summary = make_image_summary((pred_score_maps[i] * 255).astype('uint8'))            
                 img_summaries.append(tf.Summary.Value(tag='input_image/%d' % i, image=input_image_summary))
-                img_summaries.append(tf.Summary.Value(tag='training_mask/%d' % i, image=training_mask_summary))
+                img_summaries.append(tf.Summary.Value(tag='overly_small_text_region_training_mask/%d' % i, image=overly_small_text_region_training_mask_summary))
+                img_summaries.append(tf.Summary.Value(tag='text_region_boundary_training_mask/%d' % i, image=text_region_boundary_training_mask_summary))
                 img_summaries.append(tf.Summary.Value(tag='score_map_target/%d' % i, image=target_score_map_summary))
                 img_summaries.append(tf.Summary.Value(tag='score_map_pred/%d' % i, image=pred_score_map_summary))
                 for j in range(4):
-                    target_geo_map_summary = make_image_summary((self.validation_data[3][i, :, :, j] / FLAGS.input_size * 255).astype('uint8'))
+                    target_geo_map_summary = make_image_summary((self.validation_data[4][i, :, :, j] / FLAGS.input_size * 255).astype('uint8'))
                     pred_geo_map_summary = make_image_summary((pred_geo_maps[i, :, :, j] / FLAGS.input_size * 255).astype('uint8'))
                     img_summaries.append(tf.Summary.Value(tag='geo_map_%d_target/%d' % (j, i), image=target_geo_map_summary))
                     img_summaries.append(tf.Summary.Value(tag='geo_map_%d_pred/%d' % (j, i), image=pred_geo_map_summary))
-                target_geo_map_summary = make_image_summary(((self.validation_data[3][i, :, :, 4] + 1) * 127.5).astype('uint8'))
+                target_geo_map_summary = make_image_summary(((self.validation_data[4][i, :, :, 4] + 1) * 127.5).astype('uint8'))
                 pred_geo_map_summary = make_image_summary(((pred_geo_maps[i, :, :, 4] + 1) * 127.5).astype('uint8'))
                 img_summaries.append(tf.Summary.Value(tag='geo_map_%d_target/%d' % (4, i), image=target_geo_map_summary))
                 img_summaries.append(tf.Summary.Value(tag='geo_map_%d_pred/%d' % (4, i), image=pred_geo_map_summary))
@@ -232,7 +236,7 @@ def main(argv=None):
 
     opt = AdamW(FLAGS.init_learning_rate)
 
-    parallel_model.compile(loss=[dice_loss(east.training_mask, score_map_loss_weight, small_text_weight), rbox_loss(east.training_mask, small_text_weight, east.target_score_map)], loss_weights=[1., 1.], optimizer=opt)
+    parallel_model.compile(loss=[dice_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, score_map_loss_weight, small_text_weight), rbox_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, small_text_weight, east.target_score_map)], loss_weights=[1., 1.], optimizer=opt)
     east.model.summary()
 
     model_json = east.model.to_json()
