@@ -26,8 +26,8 @@ You can use your own data, but the annotation files need to conform the ICDAR 20
 ICDAR 2015 dataset can be downloaded from this [site](http://rrc.cvc.uab.es/?ch=4&com=introduction). You need the data from Task 4.1 Text Localization.\
 You can also download the [MLT dataset](http://rrc.cvc.uab.es/?ch=8&com=introduction), which uses the same annotation style as ICDAR 2015, there.
 
-Alternatively, you can download a training dataset consisting of all training images from ICDAR 2015 and ICDAR 2013 datasets with annotation files in ICDAR 2015 format [here](https://drive.google.com/file/d/1p9a3K0czxIJ6zx0cFMURnKg5ydTK3jlk/view?usp=sharing).\
-You can also get a subset of validation images from the MLT 2017 dataset containing only images with text in the Latin alphabet for validation [here](https://drive.google.com/file/d/1Ljye_kHCfZ54wHQINOivgClUAj8EF-v-/view?usp=sharing).\
+Alternatively, you can download a training dataset consisting of all training images from ICDAR 2015 and ICDAR 2013 datasets with annotation files in ICDAR 2015 format [here](https://drive.google.com/a/nlab-mpg.jp/uc?id=1p9a3K0czxIJ6zx0cFMURnKg5ydTK3jlk&export=download).\
+You can also get a subset of validation images from the MLT 2017 dataset containing only images with text in the Latin alphabet for validation [here](https://drive.google.com/a/nlab-mpg.jp/uc?id=1Ljye_kHCfZ54wHQINOivgClUAj8EF-v-&export=download).\
 The original datasets are distributed by the organizers of the [Robust Reading Competition](http://rrc.cvc.uab.es/) and are licensed under the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
 ### Training
