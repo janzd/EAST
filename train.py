@@ -98,7 +98,7 @@ class CustomTensorBoard(TensorBoard):
     def on_epoch_end(self, epoch, logs=None):        
         logs.update({'learning_rate': K.eval(self.model.optimizer.lr), 'small_text_weight': K.eval(self.small_text_weight)})
         data = next(self.data_generator)
-        pred_score_maps, pred_geo_maps = self.model.predict([data[0][0], data[0][1], data[0][2], data[0][3])
+        pred_score_maps, pred_geo_maps = self.model.predict([data[0][0], data[0][1], data[0][2], data[0][3]])
         img_summaries = []
         for i in range(3):
             input_image_summary = make_image_summary(((data[0][0][i] + 1) * 127.5).astype('uint8'))
@@ -144,7 +144,7 @@ class ValidationEvaluator(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         if (epoch + 1) % self.period == 0:
-            val_loss, val_score_map_loss, val_geo_map_loss = self.model.evaluate([self.validation_data[0], self.validation_data[1], self.validation_data[2], self.validation_data[3], [self.validation_data[3], self.validation_data[4]], batch_size=FLAGS.batch_size)
+            val_loss, val_score_map_loss, val_geo_map_loss = self.model.evaluate([self.validation_data[0], self.validation_data[1], self.validation_data[2], self.validation_data[3]], [self.validation_data[3], self.validation_data[4]], batch_size=FLAGS.batch_size)
             print('\nEpoch %d: val_loss: %.4f, val_score_map_loss: %.4f, val_geo_map_loss: %.4f' % (epoch + 1, val_loss, val_score_map_loss, val_geo_map_loss))
             val_loss_summary = tf.Summary()
             val_loss_summary_value = val_loss_summary.value.add()
@@ -162,7 +162,7 @@ class ValidationEvaluator(Callback):
             val_geo_map_loss_summary_value.tag = 'pred_geo_map_loss'
             self.val_writer.add_summary(val_geo_map_loss_summary, epoch + 1)
 
-            pred_score_maps, pred_geo_maps = self.model.predict([self.validation_data[0][0:3], self.validation_data[1][0:3], self.validation_data[2][0:3]])
+            pred_score_maps, pred_geo_maps = self.model.predict([self.validation_data[0][0:3], self.validation_data[1][0:3], self.validation_data[2][0:3], self.validation_data[3][0:3]])
             img_summaries = []
             for i in range(3):
                 input_image_summary = make_image_summary(((self.validation_data[0][i] + 1) * 127.5).astype('uint8'))

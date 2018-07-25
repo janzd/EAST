@@ -67,7 +67,7 @@ class EAST_model:
         angle_map = Lambda(lambda x: (x - 0.5) * np.pi / 2)(angle_map)
         pred_geo_map = concatenate([rbox_geo_map, angle_map], axis=3, name='pred_geo_map')
 
-        model = Model(inputs=[input_image, training_mask, target_score_map], outputs=[pred_score_map, pred_geo_map])
+        model = Model(inputs=[input_image, overly_small_text_region_training_mask, text_region_boundary_training_mask, target_score_map], outputs=[pred_score_map, pred_geo_map])
 
         self.model = model
         self.input_image = input_image
