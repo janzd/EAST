@@ -22,24 +22,24 @@ from losses import dice_loss, rbox_loss
 import data_processor
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--input_size', type=int, default=512)
-parser.add_argument('--batch_size', type=int, default=16)
-parser.add_argument('--nb_workers', type=int, default=8)
-parser.add_argument('--init_learning_rate', type=float, default=0.0001)
-parser.add_argument('--lr_decay_rate', type=float, default=0.94)
-parser.add_argument('--lr_decay_steps', type=int, default=130)
-parser.add_argument('--max_epochs', type=int, default=800)
-parser.add_argument('--gpu_list', type=str, default='1')
-parser.add_argument('--checkpoint_path', type=str, default='tmp/east_resnet_50_rbox')
-parser.add_argument('--save_checkpoint_epochs', type=int, default=10)
-parser.add_argument('--training_data_path', type=str, default='../data/ICDAR2015/train_data')
-parser.add_argument('--validation_data_path', type=str, default='../data/MLT/val_data_latin')
-parser.add_argument('--max_image_large_side', type=int, default=1280)
-parser.add_argument('--max_text_size', type=int, default=800)
-parser.add_argument('--min_text_size', type=int, default=10)
-parser.add_argument('--min_crop_side_ratio', type=float, default=0.1)
-parser.add_argument('--geometry', type=str, default='RBOX')
-parser.add_argument('--suppress_warnings_and_error_messages', type=bool, default=True)
+parser.add_argument('--input_size', type=int, default=512) # input size for training of the network
+parser.add_argument('--batch_size', type=int, default=16) # batch size for training
+parser.add_argument('--nb_workers', type=int, default=4) # number of processes to spin up when using process based threading, as defined in https://keras.io/models/model/#fit_generator
+parser.add_argument('--init_learning_rate', type=float, default=0.0001) # initial learning rate
+parser.add_argument('--lr_decay_rate', type=float, default=0.94) # decay rate for the learning rate
+parser.add_argument('--lr_decay_steps', type=int, default=130) # number of steps after which the learning rate is decayed by decay rate
+parser.add_argument('--max_epochs', type=int, default=800) # maximum number of epochs
+parser.add_argument('--gpu_list', type=str, default='0') # list of gpus to use
+parser.add_argument('--checkpoint_path', type=str, default='tmp/east_resnet_50_rbox') # path to a directory to save model checkpoints during training
+parser.add_argument('--save_checkpoint_epochs', type=int, default=10) # period at which checkpoints are saved (defaults to every 10 epochs)
+parser.add_argument('--training_data_path', type=str, default='../data/ICDAR2015/train_data') # path to training data
+parser.add_argument('--validation_data_path', type=str, default='../data/MLT/val_data_latin') # path to validation data
+parser.add_argument('--max_image_large_side', type=int, default=1280) # maximum size of the large side of a training image before cropping a patch for training
+parser.add_argument('--max_text_size', type=int, default=800) # maximum size of a text instance in an image; image resized if this limit is exceeded
+parser.add_argument('--min_text_size', type=int, default=10) # minimum size of a text instance; if smaller, then it is ignored during training
+parser.add_argument('--min_crop_side_ratio', type=float, default=0.1) # the minimum ratio of min(H, W), the smaller side of the image, when taking a random crop from thee input image
+parser.add_argument('--geometry', type=str, default='RBOX') # geometry type to be used; only RBOX is implemented now, but the original paper also uses QUAD
+parser.add_argument('--suppress_warnings_and_error_messages', type=bool, default=True) # whether to show error messages and warnings during training (some error messages during training are expected to appear because of the way patches for training are created)
 FLAGS = parser.parse_args()
 
 gpus = list(range(len(FLAGS.gpu_list.split(','))))

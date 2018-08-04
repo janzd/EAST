@@ -41,7 +41,8 @@ Training is started by running `train.py`. It accepts several arguments includin
 ```
 python train.py --gpu_list=0,1 --input_size=512 --batch_size=12 --nb_workers=6 --training_data_path=../data/ICDAR2015/train_data/ --validation_data_path=../data/MLT/val_data_latin/ --checkpoint_path=tmp/icdar2015_east_resnet50/
 ```
-I will upload weights of a model trained on ICDAR 2015 and 2013 soon.
+
+You can download a model trained on ICDAR 2015 and 2013 [here](https://drive.google.com/file/d/1hfIzGuQn-xApDYiucMDZvOCosyAVwvku/view?usp=sharing). It achieves 0.802 F-score on ICDAR 2015 test set.
 
 ### Test
 
@@ -53,12 +54,12 @@ python eval.py --gpu_list=0 --test_data_path=../data/ICDAR2015/test/ --model_pat
 ```
 
 ### Detection examples
-![image_1](samples/img_12.jpg)
-![image_2](samples/img_13.jpg)
-![image_3](samples/img_14.jpg)
-![image_4](samples/img_15.jpg)
-![image_5](samples/img_28.jpg)
-![image_6](samples/img_29.jpg)
-![image_7](samples/img_33.jpg)
-![image_8](samples/img_37.jpg)
-![image_9](samples/img_42.jpg)
+![image_1](examples/img_12.jpg)
+![image_2](examples/img_13.jpg)
+![image_3](examples/img_14.jpg)
+![image_4](examples/img_15.jpg)
+![image_5](examples/img_28.jpg)
+![image_6](examples/img_29.jpg)
+![image_7](examples/img_33.jpg)
+![image_8](examples/img_37.jpg)
+![image_9](examples/img_42.jpg)
