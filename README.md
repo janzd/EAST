@@ -42,7 +42,7 @@ Training is started by running `train.py`. It accepts several arguments includin
 python train.py --gpu_list=0,1 --input_size=512 --batch_size=12 --nb_workers=6 --training_data_path=../data/ICDAR2015/train_data/ --validation_data_path=../data/MLT/val_data_latin/ --checkpoint_path=tmp/icdar2015_east_resnet50/
 ```
 
-You can download a model trained on ICDAR 2015 and 2013 [here](https://drive.google.com/file/d/1hfIzGuQn-xApDYiucMDZvOCosyAVwvku/view?usp=sharing). It achieves 0.802 F-score on ICDAR 2015 test set.
+You can download a model trained on ICDAR 2015 and 2013 [here](https://drive.google.com/file/d/1hfIzGuQn-xApDYiucMDZvOCosyAVwvku/view?usp=sharing). It achieves 0.802 F-score on ICDAR 2015 test set. You also need to download this [JSON file](https://drive.google.com/file/d/1gnkdCToYQfdU3ssaOareFTBr0Nz6u4rr/view?usp=sharing) of the model to be able to use it.
 
 ### Test
 
