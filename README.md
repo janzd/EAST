@@ -19,6 +19,8 @@ The code should run under both Python 2 and Python 3.
 
 Keras 2.0 or higher, and TensorFlow 1.0 or higher should be enough.
 
+I will add a list of packages and their versions under which no errors should occur later.
+
 ### Data
 
 You can use your own data, but the annotation files need to conform the ICDAR 2015 format.
