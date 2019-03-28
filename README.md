@@ -19,6 +19,8 @@ The code should run under both Python 2 and Python 3.
 
 Keras 2.0 or higher, and TensorFlow 1.0 or higher should be enough.
 
+The code should run with Keras 2.1.5. If you use Keras 2.2 or higher, you have to remove `ZeroPadding2D` from the `model.py` file. Specifically, replace the line containing `ZeroPadding2D` with `x = concatenate([x, resnet.get_layer('activation_10').output], axis=3)`.
+
 I will add a list of packages and their versions under which no errors should occur later.
 
 ### Data
