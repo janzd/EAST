@@ -58,8 +58,8 @@ def resize_image(im, max_side_len=2400):
     resize_h = int(resize_h * ratio)
     resize_w = int(resize_w * ratio)
 
-    resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32 - 1) * 32
-    resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32 - 1) * 32
+    resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32) * 32
+    resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32) * 32
     im = cv2.resize(im, (int(resize_w), int(resize_h)))
 
     ratio_h = resize_h / float(h)
@@ -133,7 +133,7 @@ def main(argv=None):
             raise
 
     # load trained model
-    json_file = open('/'.join(FLAGS.model_path.split('/')[0:-1]) + '/model.json', 'r')
+    json_file = open(os.path.join('/'.join(FLAGS.model_path.split('/')[0:-1]), 'model.json'), 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     model = model_from_json(loaded_model_json, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR})

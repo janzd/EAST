@@ -52,7 +52,7 @@ The images you want to classify have to be in one directory, whose path you have
 
 #### Execution example
 ```
-python eval.py --gpu_list=0 --test_data_path=../data/ICDAR2015/test/ --model_path=tmp/icdar2015_east_resnet50/ --output_dir=tmp/icdar2015_east_resnet50/eval/
+python eval.py --gpu_list=0 --test_data_path=../data/ICDAR2015/test/ --model_path=tmp/icdar2015_east_resnet50/model_XXX.h5 --output_dir=tmp/icdar2015_east_resnet50/eval/
 ```
 
 ### Detection examples

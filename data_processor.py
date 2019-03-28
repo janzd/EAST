@@ -339,7 +339,7 @@ def rectangle_from_parallelogram(FLAGS, poly):
             return np.array([new_p0, p1, new_p2, p3], dtype=np.float32)
 
 
-def sort_rectangle(poly):
+def sort_rectangle(FLAGS, poly):
     # sort the four coordinates of the polygon, points in poly should be sorted clockwise
     # First find the lowest point
     p_lowest = np.argmax(poly[:, 1])
@@ -555,7 +555,7 @@ def generate_rbox(FLAGS, im_size, polys, tags):
             [min_coord_idx, (min_coord_idx + 1) % 4, (min_coord_idx + 2) % 4, (min_coord_idx + 3) % 4]]
 
         rectange = rectangle_from_parallelogram(FLAGS, parallelogram)
-        rectange, rotate_angle = sort_rectangle(rectange)
+        rectange, rotate_angle = sort_rectangle(FLAGS, rectange)
 
         p0_rect, p1_rect, p2_rect, p3_rect = rectange
         for y, x in xy_in_poly:
