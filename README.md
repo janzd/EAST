@@ -19,6 +19,10 @@ The code should run under both Python 2 and Python 3.
 
 Keras 2.0 or higher, and TensorFlow 1.0 or higher should be enough.
 
+The code should run with Keras 2.1.5. If you use Keras 2.2 or higher, you have to remove `ZeroPadding2D` from the `model.py` file. Specifically, replace the line containing `ZeroPadding2D` with `x = concatenate([x, resnet.get_layer('activation_10').output], axis=3)`.
+
+I will add a list of packages and their versions under which no errors should occur later.
+
 ### Data
 
 You can use your own data, but the annotation files need to conform the ICDAR 2015 format.
@@ -42,7 +46,7 @@ Training is started by running `train.py`. It accepts several arguments includin
 python train.py --gpu_list=0,1 --input_size=512 --batch_size=12 --nb_workers=6 --training_data_path=../data/ICDAR2015/train_data/ --validation_data_path=../data/MLT/val_data_latin/ --checkpoint_path=tmp/icdar2015_east_resnet50/
 ```
 
-You can download a model trained on ICDAR 2015 and 2013 [here](https://drive.google.com/file/d/1hfIzGuQn-xApDYiucMDZvOCosyAVwvku/view?usp=sharing). It achieves 0.802 F-score on ICDAR 2015 test set.
+You can download a model trained on ICDAR 2015 and 2013 [here](https://drive.google.com/file/d/1hfIzGuQn-xApDYiucMDZvOCosyAVwvku/view?usp=sharing). It achieves 0.802 F-score on ICDAR 2015 test set. You also need to download this [JSON file](https://drive.google.com/file/d/1gnkdCToYQfdU3ssaOareFTBr0Nz6u4rr/view?usp=sharing) of the model to be able to use it.
 
 ### Test
 
@@ -50,7 +54,7 @@ The images you want to classify have to be in one directory, whose path you have
 
 #### Execution example
 ```
-python eval.py --gpu_list=0 --test_data_path=../data/ICDAR2015/test/ --model_path=tmp/icdar2015_east_resnet50/ --output_dir=tmp/icdar2015_east_resnet50/eval/
+python eval.py --gpu_list=0 --test_data_path=../data/ICDAR2015/test/ --model_path=tmp/icdar2015_east_resnet50/model_XXX.h5 --output_dir=tmp/icdar2015_east_resnet50/eval/
 ```
 
 ### Detection examples
