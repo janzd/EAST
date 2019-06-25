@@ -133,7 +133,7 @@ def main(argv=None):
             raise
 
     # load trained model
-    json_file = open('/'.join(FLAGS.model_path.split('/')[0:-1]) + '/model.json', 'r')
+    json_file = open(os.path.join('/'.join(FLAGS.model_path.split('/')[0:-1]), 'model.json'), 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     model = model_from_json(loaded_model_json, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR})

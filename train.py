@@ -32,6 +32,7 @@ parser.add_argument('--max_epochs', type=int, default=800) # maximum number of e
 parser.add_argument('--gpu_list', type=str, default='0') # list of gpus to use
 parser.add_argument('--checkpoint_path', type=str, default='tmp/east_resnet_50_rbox') # path to a directory to save model checkpoints during training
 parser.add_argument('--save_checkpoint_epochs', type=int, default=10) # period at which checkpoints are saved (defaults to every 10 epochs)
+parser.add_argument('--restore_model', type=str, default='')
 parser.add_argument('--training_data_path', type=str, default='../data/ICDAR2015/train_data') # path to training data
 parser.add_argument('--validation_data_path', type=str, default='../data/MLT/val_data_latin') # path to validation data
 parser.add_argument('--max_image_large_side', type=int, default=1280) # maximum size of the large side of a training image before cropping a patch for training
@@ -144,7 +145,9 @@ class ValidationEvaluator(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         if (epoch + 1) % self.period == 0:
-            val_loss, val_score_map_loss, val_geo_map_loss = self.model.evaluate([self.validation_data[0], self.validation_data[1], self.validation_data[2], self.validation_data[3]], [self.validation_data[3], self.validation_data[4]], batch_size=FLAGS.batch_size)
+            val_loss, val_score_map_loss, val_geo_map_loss = self.model.evaluate([self.validation_data[0], self.validation_data[1], self.validation_data[2], self.validation_data[3]],
+                                                                                 [self.validation_data[3], self.validation_data[4]],
+                                                                                 batch_size=FLAGS.batch_size)
             print('\nEpoch %d: val_loss: %.4f, val_score_map_loss: %.4f, val_geo_map_loss: %.4f' % (epoch + 1, val_loss, val_score_map_loss, val_geo_map_loss))
             val_loss_summary = tf.Summary()
             val_loss_summary_value = val_loss_summary.value.add()
@@ -169,7 +172,7 @@ class ValidationEvaluator(Callback):
                 overly_small_text_region_training_mask_summary = make_image_summary((self.validation_data[1][i] * 255).astype('uint8'))
                 text_region_boundary_training_mask_summary = make_image_summary((self.validation_data[2][i] * 255).astype('uint8'))
                 target_score_map_summary = make_image_summary((self.validation_data[3][i] * 255).astype('uint8'))
-                pred_score_map_summary = make_image_summary((pred_score_maps[i] * 255).astype('uint8'))            
+                pred_score_map_summary = make_image_summary((pred_score_maps[i] * 255).astype('uint8'))
                 img_summaries.append(tf.Summary.Value(tag='input_image/%d' % i, image=input_image_summary))
                 img_summaries.append(tf.Summary.Value(tag='overly_small_text_region_training_mask/%d' % i, image=overly_small_text_region_training_mask_summary))
                 img_summaries.append(tf.Summary.Value(tag='text_region_boundary_training_mask/%d' % i, image=text_region_boundary_training_mask_summary))
@@ -220,7 +223,8 @@ def main(argv=None):
         print('Training with %d GPUs' % len(gpus))
         with tf.device("/cpu:0"):
             east = EAST_model(FLAGS.input_size)
-
+        if FLAGS.restore_model is not '':
+            east.model.load_weights(FLAGS.restore_model)
         parallel_model = multi_gpu_model(east.model, gpus=len(gpus))
 
     score_map_loss_weight = K.variable(0.01, name='score_map_loss_weight')
@@ -236,7 +240,10 @@ def main(argv=None):
 
     opt = AdamW(FLAGS.init_learning_rate)
 
-    parallel_model.compile(loss=[dice_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, score_map_loss_weight, small_text_weight), rbox_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, small_text_weight, east.target_score_map)], loss_weights=[1., 1.], optimizer=opt)
+    parallel_model.compile(loss=[dice_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, score_map_loss_weight, small_text_weight),
+                                 rbox_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, small_text_weight, east.target_score_map)],
+                           loss_weights=[1., 1.],
+                           optimizer=opt)
     east.model.summary()
 
     model_json = east.model.to_json()

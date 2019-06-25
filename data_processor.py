@@ -339,7 +339,7 @@ def rectangle_from_parallelogram(FLAGS, poly):
             return np.array([new_p0, p1, new_p2, p3], dtype=np.float32)
 
 
-def sort_rectangle(poly):
+def sort_rectangle(FLAGS, poly):
     # sort the four coordinates of the polygon, points in poly should be sorted clockwise
     # First find the lowest point
     p_lowest = np.argmax(poly[:, 1])
@@ -476,9 +476,9 @@ def generate_rbox(FLAGS, im_size, polys, tags):
         poly_h = min(np.linalg.norm(poly[0] - poly[3]), np.linalg.norm(poly[1] - poly[2]))
         poly_w = min(np.linalg.norm(poly[0] - poly[1]), np.linalg.norm(poly[2] - poly[3]))
         if min(poly_h, poly_w) < FLAGS.min_text_size:
-            cv2.fillPoly(overly_small_training_mask, poly.astype(np.int32)[np.newaxis, :, :], 0)
+            cv2.fillPoly(overly_small_text_region_training_mask, poly.astype(np.int32)[np.newaxis, :, :], 0)
         if tag:
-            cv2.fillPoly(overly_small_training_mask, poly.astype(np.int32)[np.newaxis, :, :], 0)
+            cv2.fillPoly(overly_small_text_region_training_mask, poly.astype(np.int32)[np.newaxis, :, :], 0)
 
         xy_in_poly = np.argwhere(shrinked_poly_mask == (poly_idx + 1))
         # if geometry == 'RBOX':
@@ -555,7 +555,7 @@ def generate_rbox(FLAGS, im_size, polys, tags):
             [min_coord_idx, (min_coord_idx + 1) % 4, (min_coord_idx + 2) % 4, (min_coord_idx + 3) % 4]]
 
         rectange = rectangle_from_parallelogram(FLAGS, parallelogram)
-        rectange, rotate_angle = sort_rectangle(rectange)
+        rectange, rotate_angle = sort_rectangle(FLAGS, rectange)
 
         p0_rect, p1_rect, p2_rect, p3_rect = rectange
         for y, x in xy_in_poly:
@@ -689,7 +689,7 @@ def generator(FLAGS, input_size=512, background_ratio=3./8, is_train=True, idx=N
                         continue
                     # pad and resize image
                     im, _, _ = pad_image(im, FLAGS.input_size, is_train)
-                    im = cv2.resize(im_padded, dsize=(input_size, input_size))
+                    im = cv2.resize(im, dsize=(input_size, input_size))
                     score_map = np.zeros((input_size, input_size), dtype=np.uint8)
                     geo_map_channels = 5 if FLAGS.geometry == 'RBOX' else 8
                     geo_map = np.zeros((input_size, input_size, geo_map_channels), dtype=np.float32)
