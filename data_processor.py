@@ -588,6 +588,14 @@ def get_text_file(image_file):
     txt_file = txt_file.replace(txt_file_name, 'gt_' + txt_file_name)
     return txt_file
 
+def get_text_custom_crop_file(image_file):
+    ## text file format : cropped_image_D5005-5028052_2400_3400.jpg
+    image_file = image_file.replace("cropped_image", "annotation")
+    txt_file = image_file.replace(os.path.basename(image_file).split('.')[1], 'txt')
+    txt_file_name = txt_file.split('/')[-1]
+    txt_file = txt_file.replace(txt_file_name, 'gt_' + txt_file_name)
+    return txt_file
+
 def pad_image(img, input_size, is_train):
     new_h, new_w, _ = img.shape
     max_h_w_i = np.max([new_h, new_w, input_size])
@@ -662,7 +670,7 @@ def generator(FLAGS, input_size=512, background_ratio=3./8, is_train=True, idx=N
                 im_fn = image_list[i]
                 im = cv2.imread(im_fn)
                 h, w, _ = im.shape
-                txt_fn = get_text_file(im_fn)
+                txt_fn = get_text_custom_crop_file(im_fn)
                 if not os.path.exists(txt_fn):
                     if not FLAGS.suppress_warnings_and_error_messages:
                         print('text file {} does not exists'.format(txt_fn))
@@ -782,7 +790,7 @@ def val_generator(FLAGS, idx=None, is_train=False):
                 im_fn = image_list[i]
                 im = cv2.imread(im_fn)
                 h, w, _ = im.shape
-                txt_fn = get_text_file(im_fn)
+                txt_fn = get_text_custom_crop_file(im_fn)
                 if not os.path.exists(txt_fn):
                     if not FLAGS.suppress_warnings_and_error_messages:
                         print('text file {} does not exists'.format(txt_fn))
@@ -833,7 +841,7 @@ def load_data_process(args):
     try:
         img = cv2.imread(image_file)
         h, w, _ = img.shape
-        txt_file = get_text_file(image_file)
+        txt_file = get_text_custom_crop_file(image_file)
         if not os.path.exists(txt_file):
             print('text file {} does not exists'.format(txt_file))
 
