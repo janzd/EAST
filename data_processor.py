@@ -589,12 +589,17 @@ def get_text_file(image_file):
     return txt_file
 
 def get_text_custom_crop_file(image_file):
-    ## text file format : cropped_image_D5005-5028052_2400_3400.jpg
-    image_file = image_file.replace("cropped_image", "annotation")
+    
     txt_file = image_file.replace(os.path.basename(image_file).split('.')[1], 'txt')
+    
+    ## this is the actual identifier
     txt_file_name = txt_file.split('/')[-1]
-    txt_file = txt_file.replace(txt_file_name, 'gt_' + txt_file_name)
+    ## after changing to annotation
+    copy = txt_file_name.replace("cropped_image", "annotation")
+    txt_file = txt_file.replace(txt_file_name, copy)
+    
     return txt_file
+    
 
 def pad_image(img, input_size, is_train):
     new_h, new_w, _ = img.shape
@@ -687,7 +692,6 @@ def generator(FLAGS, input_size=512, background_ratio=3./8, is_train=True, idx=N
                 im = cv2.resize(im, dsize=None, fx=rd_scale + x_scale_variation, fy=rd_scale + y_scale_variation)
                 text_polys[:, :, 0] *= rd_scale + x_scale_variation
                 text_polys[:, :, 1] *= rd_scale + y_scale_variation
-
                 # random crop a area from image
                 if np.random.rand() < background_ratio:
                     # crop background
@@ -750,7 +754,6 @@ def generator(FLAGS, input_size=512, background_ratio=3./8, is_train=True, idx=N
                 geo_maps.append(geo_map[::4, ::4, :].astype(np.float32))
                 overly_small_text_region_training_masks.append(overly_small_text_region_training_mask[::4, ::4, np.newaxis].astype(np.float32))
                 text_region_boundary_training_masks.append(text_region_boundary_training_mask[::4, ::4, np.newaxis].astype(np.float32))
-
                 if len(images) == FLAGS.batch_size:
                     yield [np.array(images), np.array(overly_small_text_region_training_masks), np.array(text_region_boundary_training_masks), np.array(score_maps)], [np.array(score_maps), np.array(geo_maps)]
                     images = []

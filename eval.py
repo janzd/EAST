@@ -8,7 +8,7 @@ import tensorflow as tf
 from keras.models import load_model, model_from_json
 
 import locality_aware_nms as nms_locality
-import lanms
+# import lanms
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--test_data_path', type=str, default='../data/ICDAR2015/test_data')
@@ -96,8 +96,8 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     timer['restore'] = time.time() - start
     # nms part
     start = time.time()
-    # boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
-    boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres)
+    boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
+    #boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres)
     timer['nms'] = time.time() - start
 
     if boxes.shape[0] == 0:

@@ -109,3 +109,6 @@ static/results
 *.py~
 *.h5
 *.out
+
+model_defs/
+train_char_anots_a.sh*

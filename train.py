@@ -211,7 +211,7 @@ def main(argv=None):
         os.mkdir(FLAGS.checkpoint_path)
 
     train_data_generator = data_processor.generator(FLAGS)
-    train_samples_count = data_processor.count_samples(FLAGS)
+    train_samples_count = data_processor.count_samples(FLAGS) #data_processor.count_samples(FLAGS)
 
     val_data = data_processor.load_data(FLAGS)
 
