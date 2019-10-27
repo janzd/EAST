@@ -99,6 +99,7 @@ class CustomTensorBoard(TensorBoard):
     def on_epoch_end(self, epoch, logs=None):        
         logs.update({'learning_rate': K.eval(self.model.optimizer.lr), 'small_text_weight': K.eval(self.small_text_weight)})
         data = next(self.data_generator)
+
         pred_score_maps, pred_geo_maps = self.model.predict([data[0][0], data[0][1], data[0][2], data[0][3]])
         img_summaries = []
         for i in range(3):
@@ -211,7 +212,7 @@ def main(argv=None):
         os.mkdir(FLAGS.checkpoint_path)
 
     train_data_generator = data_processor.generator(FLAGS)
-    train_samples_count = data_processor.count_samples(FLAGS) #data_processor.count_samples(FLAGS)
+    train_samples_count = data_processor.count_samples(FLAGS)
 
     val_data = data_processor.load_data(FLAGS)
 
@@ -237,7 +238,6 @@ def main(argv=None):
     small_text_weight_callback = SmallTextWeight(small_text_weight)
     validation_evaluator = ValidationEvaluator(val_data, validation_log_dir=FLAGS.checkpoint_path + '/val')
     callbacks = [lr_scheduler, ckpt, tb, small_text_weight_callback, validation_evaluator]
-
     opt = AdamW(FLAGS.init_learning_rate)
 
     parallel_model.compile(loss=[dice_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, score_map_loss_weight, small_text_weight),
@@ -250,8 +250,7 @@ def main(argv=None):
     with open(FLAGS.checkpoint_path + '/model.json', 'w') as json_file:
         json_file.write(model_json)
 
-    history = parallel_model.fit_generator(train_data_generator, epochs=FLAGS.max_epochs, steps_per_epoch=train_samples_count/FLAGS.batch_size, workers=FLAGS.nb_workers, use_multiprocessing=True, max_queue_size=10, callbacks=callbacks, verbose=1)
+    history = parallel_model.fit_generator(train_data_generator, epochs=FLAGS.max_epochs, steps_per_epoch=train_samples_count/FLAGS.batch_size, workers=FLAGS.nb_workers, use_multiprocessing=True, callbacks=callbacks, verbose=1)
 
 if __name__ == '__main__':
     main()
-
