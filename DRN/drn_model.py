@@ -17,21 +17,7 @@ from keras.layers import (Activation, BatchNormalization, Conv2D, Dropout,
 from keras.models import Model
 
 
-def conv3x3(input_tensor, out_channels, stride=1, padding=1, dilation=1, downsample=None):
-    x = CustomPaddingConv2D(out_channels, kernel_size=3, stride=stride, padding=padding, dilation=dilation).GetLayer()(input_tensor)
-    return x
-
-
-def downsample(in_filters, planes, expansion_term, stride=1):
-
-    downsample = keras.models.Sequential()
-
-    downsample.add(Conv2D(planes * expansion_term, kernel_size=(1,1), strides=(stride, stride)))
-    downsample.add(BatchNormalization(planes * expansion_term))
-
-    return downsample
-
-def bottleneck(out_channels, stride=1, downsample=None,
+def bottleneck(x, out_channels, stride=1, downsample=None,
                  dilation=(1, 1), residual=True):
 
     residual = x
@@ -48,13 +34,12 @@ def bottleneck(out_channels, stride=1, downsample=None,
     x = BatchNormalization()(x)
 
     if downsample is not None:
-        residual = downsample(out_channels * 4, )(x)
+        residual = downsample(out_channels * 4)(x)
 
     out = x + residual
     out = ReLU(out)
 
     return out
-
 
 
 
@@ -96,12 +81,13 @@ class DRN(keras.Model):
         elif arch == 'D':
 
             self.layer0 = conv0_sequential(3, channels[0])
-            # self.layer1 = self._make_layer(
 
-            # )
-            # self.layer2 = self._make_layer(
-
-            # )
+            self.layer1 = self._make_conv_layers(
+                channels[0], layers[0], stride=1
+            )
+            self.layer2 = self._make_conv_layers(
+                channels[1], layers[1], stride=2)
+            )
 
         
         self.layer3 = self._make_layer(block, channels[2], layers[2], stride=2)
@@ -124,6 +110,21 @@ class DRN(keras.Model):
 
     def call():
         pass
+
+    def _make_conv_layers(self, channels, convs, stride=1, padding=1, dilation=1):
+
+        modules = []
+        for i in range(convs):
+            modules.extend([
+                Conv2D(channels, kernel_size=(3,3),
+                          stride=stride if i == 0 else 1,
+                          padding=dilation, dilation=dilation),
+                BatchNormalization(),
+                ReLU()])
+            self.in_channels = channels
+
+        return keras.models.Sequential(layers=modules)
+
 
     def _make_layer(self, block, planes, blocks, stride=1, dilation=1, new_level=True, residual=True):
         downsample = None
