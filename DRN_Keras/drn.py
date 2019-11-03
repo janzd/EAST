@@ -12,9 +12,10 @@ from keras.models import Model
 from keras.layers import Conv2D, Input, BatchNormalization, Activation
 
 
-def build_DRN26():
+def build_DRN26(input_tensor):
     
-    input_tensor = Input(shape=(None, None, 3))
+    if input_tensor is None:
+        input_tensor = Input(shape=(None, None, 3))
 
     Y = Conv2D(16, (7,7), name='layer1_1')(input_tensor)
 
@@ -93,7 +94,7 @@ def build_DRN26():
     return keras.models.Model(inputs=input_tensor, outputs=Y)
 
 
-def build_DRN42():
+def build_DRN42(input_tensor):
     """
     Creates the DRNC_42 Model.
     Inputs:
@@ -101,8 +102,8 @@ def build_DRN42():
     Outputs:
         - model: DRNC_42 Keras Model
     """
-
-    input_tensor = Input(shape=(None, None, 3))
+    if input_tensor is None:
+        input_tensor = Input(shape=(None, None, 3))
 
     ## input block
     y = Conv2D(16, (7,7), name='layer1_1')(input_tensor)

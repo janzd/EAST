@@ -1,10 +1,9 @@
 import numpy as np
 
-from DRN_Keras import drn
-
 import keras
 import keras.backend as K
 import tensorflow as tf
+from DRN_Keras.drn import build_DRN26, build_DRN42
 from keras import regularizers
 from keras.layers import (Activation, BatchNormalization, Conv2D, Dropout,
                           Input, Lambda, Layer, MaxPooling2D, ZeroPadding2D,
@@ -88,7 +87,8 @@ class EAST_DRN_model():
         overly_small_text_region_training_mask = Input(shape=(None, None, 1), name='overly_small_text_region_training_mask')
         text_region_boundary_training_mask = Input(shape=(None, None, 1), name='text_region_boundary_training_mask')
         target_score_map = Input(shape=(None, None, 1), name='target_score_map')
-        drn_backbone = build_DRN26(input_tensor=input_image)
+        # drn_backbone = build_DRN26(input_tensor=input_image)
+        drn_backbone = build_DRN42(input_tensor=input_image)
         x = drn_backbone.output
 
         x = Lambda(resize_bilinear, name='resize_1')(x)
