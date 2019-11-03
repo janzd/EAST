@@ -17,7 +17,7 @@ import keras.backend as K
 
 from adamw import AdamW
 
-from model import EAST_model
+from model import EAST_model, EAST_DRN_model
 from losses import dice_loss, rbox_loss
 import data_processor
 
@@ -41,6 +41,7 @@ parser.add_argument('--min_text_size', type=int, default=10) # minimum size of a
 parser.add_argument('--min_crop_side_ratio', type=float, default=0.1) # the minimum ratio of min(H, W), the smaller side of the image, when taking a random crop from thee input image
 parser.add_argument('--geometry', type=str, default='RBOX') # geometry type to be used; only RBOX is implemented now, but the original paper also uses QUAD
 parser.add_argument('--suppress_warnings_and_error_messages', type=bool, default=True) # whether to show error messages and warnings during training (some error messages during training are expected to appear because of the way patches for training are created)
+parser.add_argument('--drn', type=bool, default=False) # specify whether to use the DRN back bone or not
 FLAGS = parser.parse_args()
 
 gpus = list(range(len(FLAGS.gpu_list.split(','))))
@@ -215,6 +216,9 @@ def main(argv=None):
     train_samples_count = data_processor.count_samples(FLAGS)
 
     val_data = data_processor.load_data(FLAGS)
+
+    ## add change here to specify the model that we need to use
+
 
     if len(gpus) <= 1:
         print('Training with 1 GPU')

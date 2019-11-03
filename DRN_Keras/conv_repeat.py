@@ -10,6 +10,7 @@ from keras.layers import Add, BatchNormalization, Conv2D, Activation
 def conv_repeat(input_channels, channel_shape, strides, dilation, kernel, residual, name):
     """
         Returns a model which performs repeated convolutional operations with residual connections
+        Mimics the basic block in original implementation
     """
     input_tensor = Input(shape=(None, None, input_channels))
     X = input_tensor
