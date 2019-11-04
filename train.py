@@ -217,12 +217,14 @@ def main(argv=None):
 
     val_data = data_processor.load_data(FLAGS)
 
-    ## add change here to specify the model that we need to use
-
-
     if len(gpus) <= 1:
         print('Training with 1 GPU')
-        east = EAST_model(FLAGS.input_size)
+
+        if FLAGS.drn:
+            east = EAST_DRN_model(input_size=FLAGS.input_size)
+        else:
+            east = EAST_model(FLAGS.input_size)
+            
         parallel_model = east.model
     else:
         print('Training with %d GPUs' % len(gpus))
