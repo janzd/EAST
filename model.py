@@ -1,5 +1,5 @@
 import keras
-from keras.applications.resnet50 import ResNet50
+from keras.applications import ResNet50
 from keras.models import Model
 from keras.layers import Conv2D, concatenate, BatchNormalization, Lambda, Input, multiply, add, ZeroPadding2D, Activation, Layer, MaxPooling2D, Dropout
 from keras import regularizers
