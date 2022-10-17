@@ -1,7 +1,7 @@
 import keras
 from keras.applications import ResNet50
 from keras.models import Model
-from keras.layers import Conv2D, concatenate, BatchNormalization, Lambda, Input, multiply, add, ZeroPadding2D, Activation, Layer, MaxPooling2D, Dropout
+from keras.layers import Conv2D, concatenate, BatchNormalization, Lambda, Input, multiply, add, Activation, Layer, MaxPooling2D, Dropout
 from keras import regularizers
 import keras.backend as K
 import tensorflow as tf
@@ -48,7 +48,7 @@ class EAST_model:
         x = Activation('relu')(x)
 
         x = Lambda(resize_bilinear, name='resize_3')(x)
-        x = concatenate([x, ZeroPadding2D(((1, 0),(1, 0)))(resnet.get_layer('activation_10').output)], axis=3)
+        x = concatenate([x, resnet.get_layer('activation_10').output], axis=3)
         x = Conv2D(32, (1, 1), padding='same', kernel_regularizer=regularizers.l2(1e-5))(x)
         x = BatchNormalization(momentum=0.997, epsilon=1e-5, scale=True)(x)
         x = Activation('relu')(x)
