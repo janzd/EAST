@@ -33,8 +33,8 @@ parser.add_argument('--gpu_list', type=str, default='0') # list of gpus to use
 parser.add_argument('--checkpoint_path', type=str, default='tmp/east_resnet_50_rbox') # path to a directory to save model checkpoints during training
 parser.add_argument('--save_checkpoint_epochs', type=int, default=10) # period at which checkpoints are saved (defaults to every 10 epochs)
 parser.add_argument('--restore_model', type=str, default='')
-parser.add_argument('--training_data_path', type=str, default='../data/ICDAR2015/train_data') # path to training data
-parser.add_argument('--validation_data_path', type=str, default='../data/MLT/val_data_latin') # path to validation data
+parser.add_argument('--training_data_path', type=str, default='data/train') # path to training data
+parser.add_argument('--validation_data_path', type=str, default='data/validation') # path to validation data
 parser.add_argument('--max_image_large_side', type=int, default=1280) # maximum size of the large side of a training image before cropping a patch for training
 parser.add_argument('--max_text_size', type=int, default=800) # maximum size of a text instance in an image; image resized if this limit is exceeded
 parser.add_argument('--min_text_size', type=int, default=10) # minimum size of a text instance; if smaller, then it is ignored during training
