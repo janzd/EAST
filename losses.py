@@ -23,7 +23,7 @@ def rbox_loss(overly_small_text_region_training_mask, text_region_boundary_train
         h_union = tf.minimum(d1_gt, d1_pred) + tf.minimum(d3_gt, d3_pred)
         area_intersect = w_union * h_union
         area_union = area_gt + area_pred - area_intersect
-        L_AABB = -tf.log((area_intersect + 1.0)/(area_union + 1.0))
+        L_AABB = -tf.math.log((area_intersect + 1.0)/(area_union + 1.0))
         L_theta = 1 - tf.cos(theta_pred - theta_gt)
         L_g = L_AABB + 20 * L_theta
         _training_mask = tf.minimum(overly_small_text_region_training_mask + small_text_weight, 1) * text_region_boundary_training_mask

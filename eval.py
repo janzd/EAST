@@ -6,19 +6,22 @@ import argparse
 import numpy as np
 import tensorflow as tf
 from keras.models import load_model, model_from_json
-
+from imutils.object_detection import non_max_suppression
+from img_preprocess import resize_image
 import locality_aware_nms as nms_locality
 import lanms
+import adamw
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--test_data_path', type=str, default='../data/ICDAR2015/test_data')
+parser.add_argument('--test_data_path', type=str, default='data\\test')
 parser.add_argument('--gpu_list', type=str, default='0')
-parser.add_argument('--model_path', type=str, default='')
-parser.add_argument('--output_dir', type=str, default='tmp/eval/east_icdar2015_resnet_v1_50_rbox/')
+parser.add_argument('--model_path', type=str, default='tmp/model/model.json')
+parser.add_argument('--weights_path', type=str, default='tmp/model/model.h5')
+parser.add_argument('--output_dir', type=str, default='tmp/eval/results/')
 FLAGS = parser.parse_args()
 
 from model import *
-from losses import *
+from losses import dice_loss
 from data_processor import restore_rectangle
 
 def get_images():
@@ -38,34 +41,34 @@ def get_images():
     return files
 
 
-def resize_image(im, max_side_len=2400):
-    '''
-    resize image to a size multiple of 32 which is required by the network
-    :param im: the resized image
-    :param max_side_len: limit of max image size to avoid out of memory in gpu
-    :return: the resized image and the resize ratio
-    '''
-    h, w, _ = im.shape
+# def resize_image(im, max_side_len=2400):
+#     '''
+#     resize image to a size multiple of 32 which is required by the network
+#     :param im: the resized image
+#     :param max_side_len: limit of max image size to avoid out of memory in gpu
+#     :return: the resized image and the resize ratio
+#     '''
+#     h, w, _ = im.shape
 
-    resize_w = w
-    resize_h = h
+#     resize_w = w
+#     resize_h = h
 
-    # limit the max side
-    if max(resize_h, resize_w) > max_side_len:
-        ratio = float(max_side_len) / resize_h if resize_h > resize_w else float(max_side_len) / resize_w
-    else:
-        ratio = 1.
-    resize_h = int(resize_h * ratio)
-    resize_w = int(resize_w * ratio)
+#     # limit the max side
+#     if max(resize_h, resize_w) > max_side_len:
+#         ratio = float(max_side_len) / resize_h if resize_h > resize_w else float(max_side_len) / resize_w
+#     else:
+#         ratio = 1.
+#     resize_h = int(resize_h * ratio)
+#     resize_w = int(resize_w * ratio)
 
-    resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32) * 32
-    resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32) * 32
-    im = cv2.resize(im, (int(resize_w), int(resize_h)))
+#     resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32) * 32
+#     resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32) * 32
+#     im = cv2.resize(im, (int(resize_w), int(resize_h)))
 
-    ratio_h = resize_h / float(h)
-    ratio_w = resize_w / float(w)
+#     ratio_h = resize_h / float(h)
+#     ratio_w = resize_w / float(w)
 
-    return im, (ratio_h, ratio_w)
+#     return im, (ratio_h, ratio_w)
 
 
 def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=0.2):
@@ -97,7 +100,8 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     # nms part
     start = time.time()
     # boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
-    boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres)
+    #boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres)
+    boxes = non_max_suppression(np.array(boxes, nms_thres))
     timer['nms'] = time.time() - start
 
     if boxes.shape[0] == 0:
@@ -132,12 +136,14 @@ def main(argv=None):
         if e.errno != 17:
             raise
 
-    # load trained model
-    json_file = open(os.path.join('/'.join(FLAGS.model_path.split('/')[0:-1]), 'model.json'), 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR})
-    model.load_weights(FLAGS.model_path)
+    #load trained model
+    with open(os.path.join('/'.join(FLAGS.model_path.split('/')[0:-1]), 'model.json'), 'r') as json_file:
+        loaded_model_json = json_file.read()
+        model = model_from_json(loaded_model_json, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR})
+        model.load_weights(FLAGS.weights_path)
+    # RESIZE_FACTOR = 2
+    # model = keras.models.load_model(FLAGS.model_path, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR, 'AdamW': adamw.AdamW, 'loss':model.loss})
+
 
     img_list = get_images()
     for img_file in img_list:

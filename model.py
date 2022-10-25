@@ -1,11 +1,12 @@
 import keras
 from keras.applications import ResNet50
 from keras.models import Model
-from keras.layers import Conv2D, concatenate, BatchNormalization, Lambda, Input, multiply, add, Activation, Layer, MaxPooling2D, Dropout
+from keras.layers import Conv2D, concatenate, BatchNormalization, Lambda, Input, multiply, add, Activation, Layer, MaxPooling2D, Dropout, ZeroPadding2D
 from keras import regularizers
 import keras.backend as K
 import tensorflow as tf
 import numpy as np
+
 
 RESIZE_FACTOR = 2
 
@@ -21,7 +22,7 @@ def resize_output_shape(input_shape):
 
 class EAST_model:
 
-    def __init__(self, input_size=512):
+    def __init__(self, input_size=768):
         input_image = Input(shape=(None, None, 3), name='input_image')
         overly_small_text_region_training_mask = Input(shape=(None, None, 1), name='overly_small_text_region_training_mask')
         text_region_boundary_training_mask = Input(shape=(None, None, 1), name='text_region_boundary_training_mask')
@@ -48,7 +49,8 @@ class EAST_model:
         x = Activation('relu')(x)
 
         x = Lambda(resize_bilinear, name='resize_3')(x)
-        x = concatenate([x, resnet.get_layer('activation_10').output], axis=3)
+        x = concatenate([x, ZeroPadding2D(((1, 0),(1, 0)))(resnet.get_layer('activation_10').output)], axis=3)
+        #x = concatenate([x, resnet.get_layer('activation_10').output], axis=3)
         x = Conv2D(32, (1, 1), padding='same', kernel_regularizer=regularizers.l2(1e-5))(x)
         x = BatchNormalization(momentum=0.997, epsilon=1e-5, scale=True)(x)
         x = Activation('relu')(x)

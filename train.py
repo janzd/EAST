@@ -16,25 +16,25 @@ from keras.optimizers import Adam, SGD
 import keras.backend as K
 
 from adamw import AdamW
-
+from img_preprocess import resize_image
 from model import EAST_model
 from losses import dice_loss, rbox_loss
 import data_processor
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--input_size', type=int, default=512) # input size for training of the network
+parser.add_argument('--input_size', type=int, default=768) # input size for training of the network
 parser.add_argument('--batch_size', type=int, default=16) # batch size for training
 parser.add_argument('--nb_workers', type=int, default=4) # number of processes to spin up when using process based threading, as defined in https://keras.io/models/model/#fit_generator
 parser.add_argument('--init_learning_rate', type=float, default=0.0001) # initial learning rate
 parser.add_argument('--lr_decay_rate', type=float, default=0.94) # decay rate for the learning rate
 parser.add_argument('--lr_decay_steps', type=int, default=130) # number of steps after which the learning rate is decayed by decay rate
-parser.add_argument('--max_epochs', type=int, default=800) # maximum number of epochs
+parser.add_argument('--max_epochs', type=int, default=25) # maximum number of epochs
 parser.add_argument('--gpu_list', type=str, default='0') # list of gpus to use
-parser.add_argument('--checkpoint_path', type=str, default='tmp/east_resnet_50_rbox') # path to a directory to save model checkpoints during training
+parser.add_argument('--checkpoint_path', type=str, default='tmp\\model') # path to a directory to save model checkpoints during training
 parser.add_argument('--save_checkpoint_epochs', type=int, default=10) # period at which checkpoints are saved (defaults to every 10 epochs)
 parser.add_argument('--restore_model', type=str, default='')
-parser.add_argument('--training_data_path', type=str, default='data/train') # path to training data
-parser.add_argument('--validation_data_path', type=str, default='data/validation') # path to validation data
+parser.add_argument('--training_data_path', type=str, default='data\\train') # path to training data
+parser.add_argument('--validation_data_path', type=str, default='data\\validation') # path to validation data
 parser.add_argument('--max_image_large_side', type=int, default=1280) # maximum size of the large side of a training image before cropping a patch for training
 parser.add_argument('--max_text_size', type=int, default=800) # maximum size of a text instance in an image; image resized if this limit is exceeded
 parser.add_argument('--min_text_size', type=int, default=10) # minimum size of a text instance; if smaller, then it is ignored during training
@@ -141,7 +141,7 @@ class ValidationEvaluator(Callback):
         self.period = period
         self.validation_data = validation_data
         self.validation_log_dir = validation_log_dir
-        self.val_writer = tf.summary.FileWriter(self.validation_log_dir)
+        self.val_writer = tf.compat.v1.summary.FileWriter(self.validation_log_dir)
 
     def on_epoch_end(self, epoch, logs={}):
         if (epoch + 1) % self.period == 0:
@@ -223,7 +223,7 @@ def main(argv=None):
         print('Training with %d GPUs' % len(gpus))
         with tf.device("/cpu:0"):
             east = EAST_model(FLAGS.input_size)
-        if FLAGS.restore_model is not '':
+        if FLAGS.restore_model != '':
             east.model.load_weights(FLAGS.restore_model)
         parallel_model = multi_gpu_model(east.model, gpus=len(gpus))
 
@@ -232,10 +232,10 @@ def main(argv=None):
     small_text_weight = K.variable(0., name='small_text_weight')
 
     lr_scheduler = LearningRateScheduler(lr_decay)
-    ckpt = CustomModelCheckpoint(model=east.model, path=FLAGS.checkpoint_path + '/model-{epoch:02d}.h5', period=FLAGS.save_checkpoint_epochs, save_weights_only=True)
-    tb = CustomTensorBoard(log_dir=FLAGS.checkpoint_path + '/train', score_map_loss_weight=score_map_loss_weight, small_text_weight=small_text_weight, data_generator=train_data_generator, write_graph=True)
+    ckpt = CustomModelCheckpoint(model=east.model, path=FLAGS.checkpoint_path + '\\model-{epoch:02d}.h5', period=FLAGS.save_checkpoint_epochs, save_weights_only=True)
+    tb = CustomTensorBoard(log_dir=FLAGS.checkpoint_path + '\\train', score_map_loss_weight=score_map_loss_weight, small_text_weight=small_text_weight, data_generator=train_data_generator, write_graph=True)
     small_text_weight_callback = SmallTextWeight(small_text_weight)
-    validation_evaluator = ValidationEvaluator(val_data, validation_log_dir=FLAGS.checkpoint_path + '/val')
+    validation_evaluator = ValidationEvaluator(val_data, validation_log_dir=FLAGS.checkpoint_path + '\\val')
     callbacks = [lr_scheduler, ckpt, tb, small_text_weight_callback, validation_evaluator]
 
     opt = AdamW(FLAGS.init_learning_rate)
@@ -243,14 +243,24 @@ def main(argv=None):
     parallel_model.compile(loss=[dice_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, score_map_loss_weight, small_text_weight),
                                  rbox_loss(east.overly_small_text_region_training_mask, east.text_region_boundary_training_mask, small_text_weight, east.target_score_map)],
                            loss_weights=[1., 1.],
-                           optimizer=opt)
+                           optimizer=opt,
+                           metrics=['accuracy'])
     east.model.summary()
 
     model_json = east.model.to_json()
     with open(FLAGS.checkpoint_path + '/model.json', 'w') as json_file:
         json_file.write(model_json)
 
-    history = parallel_model.fit_generator(train_data_generator, epochs=FLAGS.max_epochs, steps_per_epoch=train_samples_count/FLAGS.batch_size, workers=FLAGS.nb_workers, use_multiprocessing=True, max_queue_size=10, callbacks=callbacks, verbose=1)
+    history = parallel_model.fit_generator(train_data_generator, epochs=FLAGS.max_epochs, steps_per_epoch=train_samples_count/FLAGS.batch_size, workers=FLAGS.nb_workers, max_queue_size=10, callbacks=callbacks, verbose=1)
+
+    # east.model.save(FLAGS.checkpoint_path + '/model.h5')
+    # east.model.save_weights(FLAGS.checkpoint_path + '/model.h5')
+
+    # model_json = east.model.to_json()
+    # with open(FLAGS.checkpoint_path + '/model.json', 'w') as json_file:
+    #     json_file.write(model_json)
+
+    #east.model.fit_generator(train_data_generator, epochs=FLAGS.max_epochs, steps_per_epoch=train_samples_count/FLAGS.batch_size, workers=FLAGS.nb_workers, use_multiprocessing=False, max_queue_size=10, callbacks=callbacks, verbose=1)
 
 if __name__ == '__main__':
     main()

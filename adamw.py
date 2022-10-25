@@ -2,9 +2,9 @@ from keras.optimizers import Optimizer
 from keras import backend as K
 import six
 import copy
-from six.moves import zip
-from keras.utils.generic_utils import serialize_keras_object
-from keras.utils.generic_utils import deserialize_keras_object
+# from six.moves import zip
+# from keras.utils.generic_utils import serialize_keras_object
+# from keras.utils.generic_utils import deserialize_keras_object
 from keras.legacy import interfaces
 
 class AdamW(Optimizer):
