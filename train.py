@@ -6,7 +6,7 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 import argparse
-from keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint, Callback
+from keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint, Callback, EarlyStopping
 try:
     from keras.utils.training_utils import multi_gpu_model
 except ImportError:
@@ -31,7 +31,7 @@ parser.add_argument('--lr_decay_steps', type=int, default=130) # number of steps
 parser.add_argument('--max_epochs', type=int, default=25) # maximum number of epochs
 parser.add_argument('--gpu_list', type=str, default='0') # list of gpus to use
 parser.add_argument('--checkpoint_path', type=str, default='tmp\\model') # path to a directory to save model checkpoints during training
-parser.add_argument('--save_checkpoint_epochs', type=int, default=10) # period at which checkpoints are saved (defaults to every 10 epochs)
+parser.add_argument('--save_checkpoint_epochs', type=int, default=5) # period at which checkpoints are saved (defaults to every 10 epochs)
 parser.add_argument('--restore_model', type=str, default='')
 parser.add_argument('--training_data_path', type=str, default='data\\train') # path to training data
 parser.add_argument('--validation_data_path', type=str, default='data\\validation') # path to validation data
@@ -232,7 +232,7 @@ def main(argv=None):
     small_text_weight = K.variable(0., name='small_text_weight')
 
     lr_scheduler = LearningRateScheduler(lr_decay)
-    ckpt = CustomModelCheckpoint(model=east.model, path=FLAGS.checkpoint_path + '\\model-{epoch:02d}.h5', period=FLAGS.save_checkpoint_epochs, save_weights_only=True)
+    ckpt = CustomModelCheckpoint(model=east.model, path=FLAGS.checkpoint_path + '\\weights-{epoch:02d}.h5', period=FLAGS.save_checkpoint_epochs,  save_weights_only=True)
     tb = CustomTensorBoard(log_dir=FLAGS.checkpoint_path + '\\train', score_map_loss_weight=score_map_loss_weight, small_text_weight=small_text_weight, data_generator=train_data_generator, write_graph=True)
     small_text_weight_callback = SmallTextWeight(small_text_weight)
     validation_evaluator = ValidationEvaluator(val_data, validation_log_dir=FLAGS.checkpoint_path + '\\val')
