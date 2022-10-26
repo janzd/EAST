@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 from keras.models import load_model, model_from_json
 from imutils.object_detection import non_max_suppression
-from img_preprocess import resize_image
 import locality_aware_nms as nms_locality
 import lanms
 import adamw
@@ -41,34 +40,34 @@ def get_images():
     return files
 
 
-# def resize_image(im, max_side_len=2400):
-#     '''
-#     resize image to a size multiple of 32 which is required by the network
-#     :param im: the resized image
-#     :param max_side_len: limit of max image size to avoid out of memory in gpu
-#     :return: the resized image and the resize ratio
-#     '''
-#     h, w, _ = im.shape
+def resize_image(im, max_side_len=2400):
+    '''
+    resize image to a size multiple of 32 which is required by the network
+    :param im: the resized image
+    :param max_side_len: limit of max image size to avoid out of memory in gpu
+    :return: the resized image and the resize ratio
+    '''
+    h, w, _ = im.shape
 
-#     resize_w = w
-#     resize_h = h
+    resize_w = w
+    resize_h = h
 
-#     # limit the max side
-#     if max(resize_h, resize_w) > max_side_len:
-#         ratio = float(max_side_len) / resize_h if resize_h > resize_w else float(max_side_len) / resize_w
-#     else:
-#         ratio = 1.
-#     resize_h = int(resize_h * ratio)
-#     resize_w = int(resize_w * ratio)
+    # limit the max side
+    if max(resize_h, resize_w) > max_side_len:
+        ratio = float(max_side_len) / resize_h if resize_h > resize_w else float(max_side_len) / resize_w
+    else:
+        ratio = 1.
+    resize_h = int(resize_h * ratio)
+    resize_w = int(resize_w * ratio)
 
-#     resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32) * 32
-#     resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32) * 32
-#     im = cv2.resize(im, (int(resize_w), int(resize_h)))
+    resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32) * 32
+    resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32) * 32
+    im = cv2.resize(im, (int(resize_w), int(resize_h)))
 
-#     ratio_h = resize_h / float(h)
-#     ratio_w = resize_w / float(w)
+    ratio_h = resize_h / float(h)
+    ratio_w = resize_w / float(w)
 
-#     return im, (ratio_h, ratio_w)
+    return im, (ratio_h, ratio_w)
 
 
 def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_thres=0.2):
