@@ -16,7 +16,6 @@ from keras.optimizers import Adam, SGD
 import keras.backend as K
 
 from adamw import AdamW
-from img_preprocess import resize_image
 from model import EAST_model
 from losses import dice_loss, rbox_loss
 import data_processor
