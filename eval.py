@@ -136,13 +136,11 @@ def main(argv=None):
             raise
 
     #load trained model
-    with open(os.path.join('/'.join(FLAGS.model_path.split('/')[0:-1]), 'model.json'), 'r') as json_file:
-        loaded_model_json = json_file.read()
-        model = model_from_json(loaded_model_json, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR})
-        model.load_weights(FLAGS.weights_path)
-    # RESIZE_FACTOR = 2
-    # model = keras.models.load_model(FLAGS.model_path, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR, 'AdamW': adamw.AdamW, 'loss':model.loss})
-
+    json_file = open(os.path.join('/'.join(FLAGS.model_path.split('/')[0:-1]), 'model.json'), 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    model = model_from_json(loaded_model_json, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR})
+    model.load_weights(FLAGS.model_path)
 
     img_list = get_images()
     for img_file in img_list:
