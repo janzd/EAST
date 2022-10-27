@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--test_data_path', type=str, default='data\\test')
 parser.add_argument('--gpu_list', type=str, default='0')
 parser.add_argument('--model_path', type=str, default='tmp/model/model.json')
-parser.add_argument('--weights_path', type=str, default='tmp/model/model.h5')
+parser.add_argument('--weights_path', type=str, default='weights\\weights-60.h5')
 parser.add_argument('--output_dir', type=str, default='tmp/eval/results/')
 FLAGS = parser.parse_args()
 
@@ -100,7 +100,7 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     start = time.time()
     # boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
     #boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres)
-    boxes = non_max_suppression(np.array(boxes, nms_thres))
+    boxes = non_max_suppression(boxes.astype(np.float64), nms_thres)
     timer['nms'] = time.time() - start
 
     if boxes.shape[0] == 0:
@@ -140,7 +140,7 @@ def main(argv=None):
     loaded_model_json = json_file.read()
     json_file.close()
     model = model_from_json(loaded_model_json, custom_objects={'tf': tf, 'RESIZE_FACTOR': RESIZE_FACTOR})
-    model.load_weights(FLAGS.model_path)
+    model.load_weights(FLAGS.weights_path)
 
     img_list = get_images()
     for img_file in img_list:
@@ -164,6 +164,7 @@ def main(argv=None):
 
         if boxes is not None:
             boxes = boxes[:, :8].reshape((-1, 4, 2))
+            boxes = boxes.astype(np.float32)
             boxes[:, :, 0] /= ratio_w
             boxes[:, :, 1] /= ratio_h
 
