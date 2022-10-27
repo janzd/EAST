@@ -641,7 +641,7 @@ def threadsafe_generator(f):
     return g
 
 @threadsafe_generator
-def generator(FLAGS, input_size=768, background_ratio=3./8, is_train=True, idx=None, random_scale=np.array([0.5, 1, 2.0, 3.0]), vis=False):
+def generator(FLAGS, input_size=512, background_ratio=3./8, is_train=True, idx=None, random_scale=np.array([0.5, 1, 2.0, 3.0]), vis=False):
     image_list = np.array(get_images(FLAGS.training_data_path))
     if not idx is None:
         image_list = image_list[idx]

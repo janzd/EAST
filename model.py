@@ -22,7 +22,7 @@ def resize_output_shape(input_shape):
 
 class EAST_model:
 
-    def __init__(self, input_size=768):
+    def __init__(self, input_size=512):
         input_image = Input(shape=(None, None, 3), name='input_image')
         overly_small_text_region_training_mask = Input(shape=(None, None, 1), name='overly_small_text_region_training_mask')
         text_region_boundary_training_mask = Input(shape=(None, None, 1), name='text_region_boundary_training_mask')

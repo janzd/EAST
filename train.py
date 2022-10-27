@@ -20,9 +20,13 @@ from model import EAST_model
 from losses import dice_loss, rbox_loss
 import data_processor
 
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.InteractiveSession(config=config)
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--input_size', type=int, default=768) # input size for training of the network
-parser.add_argument('--batch_size', type=int, default=16) # batch size for training
+parser.add_argument('--input_size', type=int, default=512) # input size for training of the network
+parser.add_argument('--batch_size', type=int, default=4) # batch size for training
 parser.add_argument('--nb_workers', type=int, default=4) # number of processes to spin up when using process based threading, as defined in https://keras.io/models/model/#fit_generator
 parser.add_argument('--init_learning_rate', type=float, default=0.0001) # initial learning rate
 parser.add_argument('--lr_decay_rate', type=float, default=0.94) # decay rate for the learning rate
@@ -224,7 +228,7 @@ def main(argv=None):
             east = EAST_model(FLAGS.input_size)
         if FLAGS.restore_model != '':
             east.model.load_weights(FLAGS.restore_model)
-        parallel_model = multi_gpu_model(east.model, gpus=len(gpus))
+        #parallel_model = multi_gpu_model(east.model, gpus=len(gpus))
 
     score_map_loss_weight = K.variable(0.01, name='score_map_loss_weight')
 
