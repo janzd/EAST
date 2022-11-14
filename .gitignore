@@ -106,6 +106,8 @@ ENV/
 # result files for demo
 static/results
 
+data/video_test
+
 *.py~
 *.h5
 *.out
