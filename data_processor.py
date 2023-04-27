@@ -584,7 +584,7 @@ def all(iterable):
 
 def get_text_file(image_file):
     txt_file = image_file.replace(os.path.basename(image_file).split('.')[1], 'txt')
-    txt_file_name = txt_file.split('/')[-1]
+    txt_file_name = txt_file.split('\\')[-1]
     txt_file = txt_file.replace(txt_file_name, 'gt_' + txt_file_name)
     return txt_file
 
@@ -646,7 +646,7 @@ def generator(FLAGS, input_size=512, background_ratio=3./8, is_train=True, idx=N
     if not idx is None:
         image_list = image_list[idx]
     print('{} training images in {}'.format(
-        image_list.shape[0], FLAGS.training_data_path))
+        int(image_list.shape[0]/2), FLAGS.training_data_path))
     index = np.arange(0, image_list.shape[0])
     epoch = 1
     while True:
@@ -861,7 +861,7 @@ def load_data(FLAGS, is_train=False):
 
     pool = Pool(FLAGS.nb_workers)
     if sys.version_info >= (3, 0):
-        loaded_data = pool.map_async(load_data_process, zip(image_files, itertools.repeat(FLAGS), itertools.repeat(is_train))).get(9999999)
+        loaded_data = pool.map_async(load_data_process, zip(image_files, itertools.repeat(FLAGS), itertools.repeat(is_train))).get(999)
     else:
         loaded_data = pool.map_async(load_data_process, itertools.izip(image_files, itertools.repeat(FLAGS), itertools.repeat(is_train))).get(9999999)
     pool.close()
